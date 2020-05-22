@@ -3,9 +3,9 @@
 g_root=$(pwd)
 g_posts_path="$g_root/posts"
 g_build_path="$g_root/public"
-g_site_title="Welling Guzman's log"
-g_site_description="Learning journal and random notes"
-g_markdown="$g_root/vendor/Markdown.pls"
+g_site_title="Document title"
+g_site_description="Document description"
+g_markdown="$g_root/vendor/Markdown.pl"
 
 g_PATH_INFO_NAME=0
 g_PATH_INFO_EXT=1
