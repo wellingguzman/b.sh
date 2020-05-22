@@ -19,23 +19,26 @@ g_POST_CONTENT=4
 
 get_ext()
 {
-	path=$1
-	echo "${path#*.}"
+	local path=$1
+	local filename=$(basename -- "$path")
+	local extension="${filename##*.}"
+	echo "$extension"
 }
 
 get_name()
 {
-	path=$1
-	ext=$(get_ext $path)
-	name=$(basename "${path%.$ext}")
-
-	echo $name
+	local path=$1
+	local filename=$(basename -- "$path")
+	local extension="${filename##*.}"
+	local filename="${filename%.*}"
+	echo "$filename"
 }
 
 get_basename()
 {
 	path=$1
-	echo ${path##*/}
+	local filename=$(basename -- "$path")
+	echo "$filename"
 }
 
 get_path_info()
@@ -107,7 +110,9 @@ get_file_parts()
 
 build_page()
 {
-	content=$1
+	local content=$1
+	local title=$2;
+
 	if [[ ! -z "$title" ]]; then
 		title="$title – $g_site_title"
 	else
@@ -148,17 +153,16 @@ build_page()
 
 create_post()
 {
-	path=$1
-	content=$(get_content $path)
+	local path=$1
 	get_path_info "$path"
-	ext="${pathinfo[g_PATH_INFO_EXT]}"
-	name=$(get_name $path)
+	local ext="${pathinfo[g_PATH_INFO_EXT]}"
+	local name=$(get_name $path)
 
-	tmp="$path.tmp"
-	title=""
-	tags=""
-	datetime=""
-	content=""
+	local tmp="$path.tmp"
+	local title=""
+	local tags=""
+	local datetime=""
+	local content=""
 
 	echo "Building $name..."
 	echo "Reading metadata..."
@@ -203,9 +207,9 @@ create_post()
 
 	page_content=$(get_content "$tmp")
 	>$tmp
-	build_page "$page_content"
+	build_page "$page_content" "$title"
 	mv $tmp "$g_build_path/$name.html"
-	chmod 644 "$g_build_path/$name.html"
+	chmod 664 "$g_build_path/$name.html"
 }
 
 get_tags()
@@ -307,7 +311,7 @@ rebuild_index()
 	build_page "$page_content"
 
 	mv $tmp "$g_build_path/index.html"
-	chmod 644 "$g_build_path/index.html"
+	chmod 664 "$g_build_path/index.html"
 	rm -rf "$tmp_posts"
 }
 
@@ -331,7 +335,7 @@ edit()
 
 if [[ ! -f "$g_build_path" ]]; then
 	mkdir -p "$g_build_path"
-	chmod 744 "$g_build_path"
+	chmod 754 "$g_build_path"
 fi
 
 case $1 in
@@ -361,4 +365,3 @@ case $1 in
 		rebuild_index
 	;;
 esac
-

@@ -15,7 +15,7 @@ b.sh b hello.html
 b.sh ba
 ```
 
-All commands above will regenerate the index page
+All commands above will regenerate the index page.
 
 ### Directory structure
 
