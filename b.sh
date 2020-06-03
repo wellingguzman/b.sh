@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
-g_root=$(pwd)
-g_posts_path="$g_root/posts"
-g_build_path="$g_root/public"
-g_site_title="Document title"
-g_site_description="Document description"
-g_markdown="$g_root/vendor/Markdown.pl"
+_global_variables() {
+	g_root=$(pwd)
+	g_posts_path="$g_root/posts"
+	g_build_path="$g_root/public"
+	g_site_title="Document title"
+	g_site_description="Document description"
+	g_markdown="$g_root/vendor/Markdown.pl"
+
+	if [ $(type -t global_variables) == 'function' ]; then
+		global_variables
+	fi
+}
 
 g_PATH_INFO_NAME=0
 g_PATH_INFO_EXT=1
@@ -342,6 +348,13 @@ edit()
 	vim $path
 	create_post $path
 }
+
+# Add custom variables
+if [ -f "./extras.sh" ]; then
+    . ./extras.sh
+fi
+
+_global_variables
 
 if [[ ! -f "$g_build_path" ]]; then
 	echo "Creating build path: $g_build_path"
