@@ -96,18 +96,35 @@ get_file_parts()
 	local datetime=""
 	local content=""
 	local tmp="$path.info.tmp"
+	local part_start=0
+	local part_done=0
 
 	while IFS= read -r line
 	do
-		if [[ $line == "title:"* ]]; then
-			title=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
-		elif [[ $line == "tags:"* ]]; then
-			tags=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
-		elif [[ $line == "datetime:"* ]]; then
-			datetime=$(echo $line | cut -d: -f 2- | awk '{$1=$1};1')
-		else
-			echo "$line" >> "$tmp"
+		if [[ $line == "---" ]]; then
+			if [[ $part_start == 1 ]]; then
+				part_start=0
+				part_done=1
+			else
+				part_start=1
+			fi
+			continue;
 		fi
+
+		if [[ $part_done == 0 && $part_start == 1 ]]; then
+			if [[ $line == "title:"* ]]; then
+				title=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
+			elif [[ $line == "tags:"* ]]; then
+				tags=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
+			elif [[ $line == "datetime:"* ]]; then
+				datetime=$(echo $line | cut -d: -f 2- | awk '{$1=$1};1')
+			fi
+
+			continue
+		fi
+
+		# content
+		echo "$line" >> "$tmp"
 	done < "$path"
 
 	content=$(get_content "$tmp")
@@ -177,20 +194,39 @@ create_post()
 	local tags=""
 	local datetime=""
 	local content=""
+	local part_start=0
+	local part_done=0
 
 	echo "Building $name..."
 	echo "Reading metadata..."
+
+	# TODO: Create a function to split metadata and content
 	while IFS= read -r line
 	do
-		if [[ $line == "title:"* ]]; then
-			title=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
-		elif [[ $line == "tags:"* ]]; then
-			tags=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
-		elif [[ $line == "datetime:"* ]]; then
-			datetime=$(echo $line | cut -d: -f 2- | awk '{$1=$1};1')
-		else
-			echo "$line" >> "$tmp"
+		if [[ $line == "---" ]]; then
+			if [[ $part_start == 1 ]]; then
+				part_start=0
+				part_done=1
+			else
+				part_start=1
+			fi
+			continue;
 		fi
+
+		if [[ $part_done == 0 && $part_start == 1 ]]; then
+			if [[ $line == "title:"* ]]; then
+				title=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
+			elif [[ $line == "tags:"* ]]; then
+				tags=$(echo $line | cut -d: -f 2 | awk '{$1=$1};1')
+			elif [[ $line == "datetime:"* ]]; then
+				datetime=$(echo $line | cut -d: -f 2- | awk '{$1=$1};1')
+			fi
+
+			continue
+		fi
+
+		# content
+		echo "$line" >> "$tmp"
 	done < "$path"
 
 	content=$(get_content "$tmp")
