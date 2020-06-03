@@ -22,6 +22,7 @@ get_ext()
 	local path=$1
 	local filename=$(basename -- "$path")
 	local extension="${filename##*.}"
+
 	echo "$extension"
 }
 
@@ -31,13 +32,15 @@ get_name()
 	local filename=$(basename -- "$path")
 	local extension="${filename##*.}"
 	local filename="${filename%.*}"
+
 	echo "$filename"
 }
 
 get_basename()
 {
-	path=$1
+	local path=$1
 	local filename=$(basename -- "$path")
+
 	echo "$filename"
 }
 
@@ -46,6 +49,7 @@ get_path_info()
 	local name=$(get_name "$1")
 	local ext=$(get_ext "$1")
 	local basename=$name
+
 	if [[ -z "$ext" ]]; then
 		basename+=".$ext"
 	fi
@@ -60,7 +64,11 @@ get_path_info()
 get_content()
 {
 	path=$1
-	cat $path
+	if [ -s "$path" ]; then
+		cat $path
+	else
+		echo ""
+	fi
 }
 
 convert_content()
@@ -96,7 +104,7 @@ get_file_parts()
 		fi
 	done < "$path"
 
-	content=$(cat "$tmp")
+	content=$(get_content "$tmp")
 	rm -rf "$tmp"
 
 	parts=(
@@ -179,7 +187,7 @@ create_post()
 		fi
 	done < "$path"
 
-	content=$(cat $tmp)
+	content=$(get_content "$tmp")
 	if [[ $ext == "md" ]]; then
 		echo "Converting to HTML..."
 		content=$(convert_content "$content")
@@ -239,9 +247,10 @@ rebuild_index()
 	local tmp_posts="$g_root/.sort"
 	local filename;
 	local tmp;
+	local files;
+
 	mkdir -p $tmp_posts
 	chmod 750 $tmp_posts
-	local files;
 
 	echo "Sorting posts..."
 	for file in $(ls -d $g_posts_path/*.{html,md} 2>/dev/null); do
@@ -266,7 +275,7 @@ rebuild_index()
 
 	echo "Generating posts index..."
 	tmp="$g_posts_path/index.tmp"
-	for file in $(ls -d $tmp_posts/*); do
+	for file in $(ls -d $tmp_posts/* 2>/dev/null); do
 		get_file_parts "$file"
 		title=${parts[g_POST_TITLE]}
 		datetime=${parts[g_POST_DATETIME]}
@@ -318,6 +327,7 @@ rebuild_index()
 edit()
 {
 	local path="$g_posts_path/$1"
+
 	if [[ ! -f "$g_posts_path" ]]; then
 		mkdir -p "$g_posts_path"
 		chmod 744 "$g_posts_path"
@@ -334,6 +344,7 @@ edit()
 }
 
 if [[ ! -f "$g_build_path" ]]; then
+	echo "Creating build path: $g_build_path"
 	mkdir -p "$g_build_path"
 	chmod 754 "$g_build_path"
 fi
