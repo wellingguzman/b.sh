@@ -303,12 +303,13 @@ build_all() {
 rebuild_index()
 {
 	local tmp_posts="$g_root/.sort"
+	local tmp="$g_posts_path/index.tmp";
 	local filename;
-	local tmp;
 	local files;
 
 	mkdir -p $tmp_posts
 	chmod 750 $tmp_posts
+	>$tmp
 
 	echo "Sorting posts..."
 	for file in $(ls -d $g_posts_path/*.{html,md} 2>/dev/null); do
@@ -335,7 +336,6 @@ rebuild_index()
 	done
 
 	echo "Generating posts index..."
-	tmp="$g_posts_path/index.tmp"
 	for file in $(ls -d $tmp_posts/* 2>/dev/null); do
 		get_file_parts "$file"
 		title=${parts[g_POST_TITLE]}
@@ -377,7 +377,7 @@ rebuild_index()
 			fi
 			echo "</article>"
 			echo "<hr>"
-		} > "$tmp"
+		} >> "$tmp"
 	done
 
 	build_page "$tmp" "" "$g_build_path/index.html"
