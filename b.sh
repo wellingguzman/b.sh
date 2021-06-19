@@ -411,9 +411,11 @@ edit()
 		chmod 744 "$g_posts_path"
 	fi
 	if [[ ! -f "$path" ]]; then
+		echo "---" >> "$path"
 		echo "title: " >> "$path"
 		echo "datetime: $(date -u +%FT%TZ)" >> "$path"
 		echo "tags: " >> "$path"
+		echo "---" >> "$path"
 		echo "" >> "$path"
 	fi
 
